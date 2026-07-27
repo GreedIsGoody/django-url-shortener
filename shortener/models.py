@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 import random
 import string 
 
@@ -23,11 +24,20 @@ class ShortenerURL(models.Model):
         auto_now_add=True,
         verbose_name="Date of creation"
     )
+    expires_at = models.DateTimeField(
+        null=True,
+        blank=True
+    )
     
     class Meta:
         verbose_name = "Shorted link"
         verbose_name_plural = "Shrotener link"
         ordering = ["-created_at"]
+    
+    def is_expired(self):
+        if self.expires_at and timezone.now() > self.expires_at:
+            return True
+        return False
         
     def __str__(self):
         return f"{self.short_code} -> {self.original_url}"

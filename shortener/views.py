@@ -9,6 +9,7 @@ from drf_spectacular.utils import extend_schema
 
 from .models import ShortenerURL, ClickLog
 from .serializer import (ShortenURLCreateSerializer, ShortenerURLResponseSerializer, ShortenerURLAnalyticsSerializer)
+from django.http import Http404
 
 class ShortenURLAPIView(APIView):
     @extend_schema(
@@ -35,14 +36,28 @@ def get_client_ip(request):
 def redirect_to_original(request, short_code):
     link = get_object_or_404(ShortenerURL, short_code=short_code)
     
+    #Checking if link is expired
+    if link.is_expired():
+        raise Http404("Validity period")
+    
+    #Earn ip address
+    x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0].strip()
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    
+    #Earn User-Agent
+    user_agent = request.META.get("HTTP_USER_AGENT", "")
+    
+    #Creating a click log
+    ClickLog.objects.create(
+        url = link,
+        ip_address=ip,
+        user_agent=user_agent
+    )
     link.clicks_count += 1
     link.save(update_fields=["clicks_count"])
-    
-    ClickLog.objects.create(
-        url=link,
-        ip_address=get_client_ip(request),
-        user_agent=request.META.get("HTTP_USER_AGENT", "")
-    )
     
     return redirect(link.original_url)
 
@@ -56,3 +71,7 @@ class ShortenerURLAnalyticsAPIView(APIView):
         link = get_object_or_404(ShortenerURL, short_code=short_code)
         serializer = ShortenerURLAnalyticsSerializer(link)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+    
+    
+
