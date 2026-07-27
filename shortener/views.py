@@ -8,7 +8,7 @@ from rest_framework import status
 from drf_spectacular.utils import extend_schema
 
 from .models import ShortenerURL, ClickLog
-from .serializer import ShortenURLCreateSerializer, ShortenerURLResponseSerializer
+from .serializer import (ShortenURLCreateSerializer, ShortenerURLResponseSerializer, ShortenerURLAnalyticsSerializer)
 
 class ShortenURLAPIView(APIView):
     @extend_schema(
@@ -45,3 +45,14 @@ def redirect_to_original(request, short_code):
     )
     
     return redirect(link.original_url)
+
+class ShortenerURLAnalyticsAPIView(APIView):
+    # receiving API endpoint for analytics of trasition by link 
+    @extend_schema(
+        responses={200: ShortenerURLAnalyticsSerializer},
+        summary="Receive analytic about click by short code"
+    )
+    def get(self, request, short_code):
+        link = get_object_or_404(ShortenerURL, short_code=short_code)
+        serializer = ShortenerURLAnalyticsSerializer(link)
+        return Response(serializer.data, status=status.HTTP_200_OK)

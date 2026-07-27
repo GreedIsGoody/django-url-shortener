@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import ShortenerURL
+from .models import ShortenerURL, ClickLog
 
 class ShortenURLCreateSerializer(serializers.ModelSerializer):
     class Meta:
@@ -20,3 +20,21 @@ class ShortenerURLResponseSerializer(serializers.ModelSerializer):
         if request:
             return request.build_absolute_uri(f"/r/{obj.short_code}/")
         return f"/r/{obj.short_code}"
+    
+    
+class ClickLogSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ClickLog
+        fields = ("ip_address", "user_agent", "created_at")
+        
+        
+class ShortenerURLAnalyticsSerializer(serializers.ModelSerializer):
+    recent_clicks = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = ShortenerURL
+        fields = ("short_code", "original_url", "clicks_count", "created_at", "recent_clicks")
+        
+    def get_recent_clicks(self, obj):
+        recent = obj.clicks.all()[:10]
+        return ClickLogSerializer(recent, many=True).data
