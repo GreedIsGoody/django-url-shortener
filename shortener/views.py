@@ -2,34 +2,26 @@ from django.shortcuts import redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
 import json
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from drf_spectacular.utils import extend_schema
+
 from .models import ShortenerURL
+from .serializer import ShortenURLCreateSerializer, ShortenerURLResponseSerializer
 
-
-@csrf_exempt
-def create_short_url(request):
-    
-    if request.method == "POST":
-        try:
-            data = json.loads(request.body)
-            original_url = data.get("url")
-            
-            if not original_url:
-                return JsonResponse({"error": "URL is required"}, status=400)
-            
-            link = ShortenerURL.objects.create(original_url=original_url)
-            
-            short_url = request.build_absolute_uri(f"/r/{link.short_code}")
-            
-            return JsonResponse({
-                "short_code": link.short_code,
-                "short_url" : short_url,
-                "original_url": link.original_url
-            }, status=201)
-            
-        except json.JSONDecodeError:
-            return JsonResponse({"error": "Invalid JSON"}, status=400)
+class ShortenURLAPIView(APIView):
+    @extend_schema(
+        request=ShortenURLCreateSerializer,
+        responses={201: ShortenerURLResponseSerializer}
+    )
+    def post(self, request):
+        serializer = ShortenURLCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        link= serializer.save()
         
-    return HttpResponseBadRequest("Only POST request are allowed")
+        response_serializer = ShortenerURLResponseSerializer(link, context={"request": request})
+        return Response(response_serializer.data, status=status.HTTP_201_CREATED)
 
 def redirect_to_original(request, short_code):
     link = get_object_or_404(ShortenerURL, short_code=short_code)
