@@ -73,5 +73,18 @@ class ShortenerURLAnalyticsAPIView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
     
     
+class ShortenerURLDeleteAPIView(APIView):
+    @extend_schema(
+        responses={
+            204: None,
+            404: {"description" : "Link was not found"}
+        },
+        summary="Delete short link by code"
+    )
     
+    def delete(self, request,short_code):
+        link  = get_object_or_404(ShortenerURL, short_code=short_code)
+        link.delete()
+        
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
