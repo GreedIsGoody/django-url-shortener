@@ -8,11 +8,13 @@ from rest_framework import status
 from drf_spectacular.utils import extend_schema
 from user_agents import parse
 
+from .throttling import CreateLinkRateThrottle
 from .models import ShortenerURL, ClickLog
 from .serializer import (ShortenURLCreateSerializer, ShortenerURLResponseSerializer, ShortenerURLAnalyticsSerializer)
 from django.http import Http404
 
 class ShortenURLAPIView(APIView):
+    throttle_classes = [CreateLinkRateThrottle]
     @extend_schema(
         request=ShortenURLCreateSerializer,
         responses={201: ShortenerURLResponseSerializer}
