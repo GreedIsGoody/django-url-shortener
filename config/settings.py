@@ -124,7 +124,7 @@ REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     
     'DEFAULT_THROTTLE_CLASSES' : [
-        'rest_framework.throttling.AnonRateTrottle',
+        'rest_framework.throttling.AnonRateThrottle',
     ],
     'DEFAULT_THROTTLE_RATES': {
         'anon': '60/minute',
@@ -137,4 +137,21 @@ SPECTACULAR_SETTINGS = {
     'DESCRIPTION' : 'Asynchronous and scalable URL shortener service',
     'VERSION' : '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
+}
+
+
+#Celery config 
+CELERY_BROKEN_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+
+#Schedule of Celery Beat 
+from celery.schedules import crontab 
+
+CELERY_BEAT_SCHEDULE = {
+    'purge-expired-links-every-hour' : {
+        'task' : 'shortener.tasks.purge_expired_links_task',
+        'schedule' : crontab(minute=0, hour="*")
+    }
 }
