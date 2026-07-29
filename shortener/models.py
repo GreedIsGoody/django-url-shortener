@@ -60,6 +60,9 @@ class ClickLog(models.Model):
         blank=True,
         verbose_name = "User-Agent"
     )
+    browser = models.CharField(max_length=100, null=True, blank=True, verbose_name="Browser")
+    os = models.CharField(max_length=100, null=True, blank=True, verbose_name="OS")
+    device_type = models.CharField(max_length=50, null=True, blank=True, verbose_name="Device Type")
     
     created_at = models.DateTimeField(
         auto_now_add=True,

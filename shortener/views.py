@@ -6,6 +6,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from drf_spectacular.utils import extend_schema
+from user_agents import parse
 
 from .models import ShortenerURL, ClickLog
 from .serializer import (ShortenURLCreateSerializer, ShortenerURLResponseSerializer, ShortenerURLAnalyticsSerializer)
@@ -50,11 +51,28 @@ def redirect_to_original(request, short_code):
     #Earn User-Agent
     user_agent = request.META.get("HTTP_USER_AGENT", "")
     
+    #Adding a parser to parse info about Device, Browser, OS
+    ua_parsed = parse(user_agent)
+    
+    if ua_parsed.is_mobile:
+        device= "Mobile"
+    elif ua_parsed.is_tablet:
+        device = "Tablet"
+    elif ua_parsed.is_pc:
+        device = "PC"
+    elif ua_parsed.is_bot:
+        device = "Bot"
+    else:
+        device = "Unknown"
+    
     #Creating a click log
     ClickLog.objects.create(
         url = link,
         ip_address=ip,
-        user_agent=user_agent
+        user_agent=user_agent,
+        browser=f"{ua_parsed.browser.family} {ua_parsed.browser.version_string}".strip(),
+        os= f"{ua_parsed.os.family} {ua_parsed.os.version_string}",
+        device_type = device
     )
     link.clicks_count += 1
     link.save(update_fields=["clicks_count"])
@@ -62,7 +80,7 @@ def redirect_to_original(request, short_code):
     return redirect(link.original_url)
 
 class ShortenerURLAnalyticsAPIView(APIView):
-    # receiving API endpoint for analytics of trasition by link 
+    # receiving API endpoint for analytics of transition by link
     @extend_schema(
         responses={200: ShortenerURLAnalyticsSerializer},
         summary="Receive analytic about click by short code"

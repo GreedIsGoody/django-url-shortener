@@ -70,7 +70,7 @@ class ShortenerURLResponseSerializer(serializers.ModelSerializer):
 class ClickLogSerializer(serializers.ModelSerializer):
     class Meta:
         model = ClickLog
-        fields = ("ip_address", "user_agent", "created_at")
+        fields = ['ip_address', 'browser', 'os', 'device_type', 'created_at']
         
         
 class ShortenerURLAnalyticsSerializer(serializers.ModelSerializer):
