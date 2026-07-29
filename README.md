@@ -20,6 +20,7 @@ A modern REST API service for shortening URLs, featuring detailed click analytic
 * 📊 **Advanced Analytics:** Track IP addresses, browsers, OS, and device types (Mobile/PC/Tablet).
 * 🧹 **Management Commands:** Custom command to purge expired URLs from the database (`purge_expired`).
 * 📖 **Interactive Docs:** Full Swagger UI for exploring and testing API endpoints.
+* 🛡️ **Rate Limiting:** Protection against API spam and DoS attacks using DRF Throttling (e.g., max 5 URL creations per minute per IP).
 
 ---
 
