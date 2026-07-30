@@ -19,11 +19,19 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-z0xuzlvgfz80xgfv$d-$pa5%7c3d%275jhdq^k(e5eu^6#wnp!'
+#SECRET KEY INTEGRATION 
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+import os 
+from pathlib import Path 
+from dotenv import load_dotenv
+
+load_dotenv()
+
+SECRET_KEY = os.getenv('SECRET_KEY', 'default-unsafe-secret-key')
+DEBUG = os.getenv('DEBUG', 'True') == 'True'
+
+CELERY_BROKER_URL = os.getenv('CELERY_BROKER_URL', 'redis://127.0.0.1:6379/0')
+CELERY_RESULT_BACKEND = os.getenv('CELERY_RESULT_BACKEND', 'redis://127.0.0.1:6379/0')
 
 ALLOWED_HOSTS = []
 
@@ -152,6 +160,7 @@ from celery.schedules import crontab
 CELERY_BEAT_SCHEDULE = {
     'purge-expired-links-every-hour' : {
         'task' : 'shortener.tasks.purge_expired_links_task',
-        'schedule' : crontab(minute=0, hour="*")
+        'schedule' : crontab(minute=0, hour="*"),
     }
 }
+
