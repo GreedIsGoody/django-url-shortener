@@ -1,55 +1,50 @@
-# 🔗 Django URL Shortener API
+# 🔗 URL Shortener Service
 
-A modern REST API service for shortening URLs, featuring detailed click analytics and automated cleanup of expired links.
+A modern, high-performance REST API service for shortening URLs, built with Django REST Framework, Celery, Redis, and Docker.
+
+---
+
+## 🚀 Key Features
+
+* **URL Shortening:** Generates unique short codes for long links.
+* **Redirection & Analytics:** Redirects users and tracks total click counts per URL.
+* **Time-To-Live (TTL):** Supports setting expiration dates (`expires_at`) for links.
+* **Automated Cleanup (Celery + Redis):** Runs background periodic tasks to prune expired links without blocking the primary HTTP API.
+* **Full Containerization:** Spuns up the entire infrastructure with a single command via Docker Compose.
+* **Interactive Documentation (Swagger/OpenAPI):** Provides an interactive UI to explore and test endpoints.
 
 ---
 
 ## 🛠️ Tech Stack
 
-* **Language:** Python 3.12+
-* **Framework:** Django, Django REST Framework (DRF)
-* **Documentation:** OpenAPI 3.0 / Swagger (drf-spectacular)
-* **Utilities:** `user-agents` (User-Agent parsing)
+* **Python 3.12 / Django 6.0 / Django REST Framework**
+* **Celery 5.6** (Background Tasks)
+* **Celery Beat** (Task Scheduler)
+* **Redis 7.4** (Message Broker & Result Backend)
+* **Docker / Docker Compose**
+* **python-dotenv** (Environment Configuration)
 
 ---
 
-## ✨ Features
+## 📦 Quickstart with Docker
 
-* ✂️ **URL Shortening:** Generate unique short codes or set custom aliases.
-* ⏰ **Expiration (TTL):** Set custom lifetimes for links with automatic expiration checks upon redirect.
-* 📊 **Advanced Analytics:** Track IP addresses, browsers, OS, and device types (Mobile/PC/Tablet).
-* 🧹 **Management Commands:** Custom command to purge expired URLs from the database (`purge_expired`).
-* 📖 **Interactive Docs:** Full Swagger UI for exploring and testing API endpoints.
-* 🛡️ **Rate Limiting:** Protection against API spam and DoS attacks using DRF Throttling (e.g., max 5 URL creations per minute per IP).
-
----
-
-## 🚀 Quickstart
-
-### 1. Clone the repository and install dependencies
+### 1. Clone the Repository
 
 ```bash
 git clone [https://github.com/your-username/django-url-shortener.git](https://github.com/your-username/django-url-shortener.git)
 cd django-url-shortener
 
-# Create and activate a virtual environment
-python -m venv venv
-# Linux/macOS: source venv/bin/activate
-# Windows: venv\Scripts\activate
+2. Configure Environment Variables
+Create a .env file in the root directory (you can reference .env.example):
+DEBUG=True
+SECRET_KEY='django-insecure-your-secret-key-here'
 
-# Install requirements
-pip install -r requirements.txt
+# Redis & Celery Configs
+CELERY_BROKER_URL=redis://redis:6379/0
+CELERY_RESULT_BACKEND=redis://redis:6379/0
 
-2. Run migrations and start the server
-Bash
-python manage.py migrate
-python manage.py runserver
+3. Build & Run Containers
+Launch all 4 services (web, redis, celery, celery_beat) with a single command:
+docker-compose up --build
 
-Method	URL	Description
-POST	/api/shorten/	Create a short URL
-GET	/r/{short_code}/	Redirect to the original URL
-GET	/api/analytics/{short_code}/	Get click analytics for a link
-DELETE	/api/delete/{short_code}/	Delete a short URL
-GET	/docs/	Swagger UI Documentation
-⚙️ Additional Commands
-I have a purge expired command, this command can clean all links what are expired
+4. Testing by Swagger 
