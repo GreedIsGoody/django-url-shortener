@@ -33,8 +33,9 @@ A modern, high-performance REST API service for shortening URLs, built with Djan
 ```bash
 git clone [https://github.com/your-username/django-url-shortener.git](https://github.com/your-username/django-url-shortener.git)
 cd django-url-shortener
+```
 
-2. Configure Environment Variables
+# 2. Configure Environment Variables
 Create a .env file in the root directory (you can reference .env.example):
 DEBUG=True
 SECRET_KEY='django-insecure-your-secret-key-here'
@@ -43,8 +44,9 @@ SECRET_KEY='django-insecure-your-secret-key-here'
 CELERY_BROKER_URL=redis://redis:6379/0
 CELERY_RESULT_BACKEND=redis://redis:6379/0
 
-3. Build & Run Containers
+# 3. Build & Run Containers
 Launch all 4 services (web, redis, celery, celery_beat) with a single command:
 docker-compose up --build
 
-4. Testing by Swagger 
+# 4. Testing by Swagger 
+Only 3 routes - creating short_link - analysis, and deleting
